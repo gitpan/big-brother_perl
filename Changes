@@ -1,0 +1,7 @@
+Revision history for Perl extension BBPerl.
+
+1.10 - Initial write.
+1.20 - Fix for adding additional HTML code for the big brother server.
+1.30 - Modified the sending routing to fork a new process rather than
+       having the module to the work itself. This seemed to be needed
+			 for many of our Solaris bretheren.
