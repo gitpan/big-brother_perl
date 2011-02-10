@@ -6,14 +6,13 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 require Exporter;
 
 @ISA = qw(Exporter);
-$VERSION = sprintf "%d.%03d", q$Revision: 1.3 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%03d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
 
+use Sys::Hostname qw();
 
 sub new {
 	my $class = shift;
 	my $tname = shift;
-	my $HOSTNAME=`hostname`;
-	chomp $HOSTNAME;
 	my $self =
 	{
 		_debug => 0,
@@ -24,7 +23,7 @@ sub new {
 		_bbtmp => $ENV{BBTMP},
 		_bbcmd => $ENV{BB},
 		_bbdisp => $ENV{BBDISP},
-		_localhost =>$HOSTNAME,
+		_hostname => Sys::Hostname->hostname(),
 	};
 
 	if ($tname) {
@@ -82,12 +81,21 @@ sub bbdisp {
 	return $self->{_bbdisp};
 }
 
+# Deprecated beyond 1.3
 sub localhost {
 	my $self = shift;
 	if (@_) {
-		$self->{_localhost} = shift;
+		$self->hostname(shift);
 	}
-	return $self->{_localhost};
+	return $self->hostname();
+}
+
+sub hostname {
+	my $self = shift;
+	if (@_) {
+		$self->{_hostname} = shift;
+	}
+	return $self->{_hostname};
 }
 
 sub bbhome {
@@ -119,7 +127,7 @@ sub send {
 	my $self = shift;
 	my $debug = $self->{_debug};
 	my $cmdline = $self->{_bbcmd}." ".$self->{_bbdisp};
-	my $statusline = "status ".$self->{_localhost}.".".$self->{_testName}." ".$self->{_status}." ".`date`;
+	my $statusline = "status ".$self->{_hostname}.".".$self->{_testName}." ".$self->{_status}." ".`date`;
 	chomp ($statusline);
 	if ($debug > 0) {
 		print "The following will be sent using command:\n";
@@ -209,7 +217,7 @@ This method will tell you what the BB Display server is set to, or if you
 call it with a parameter, it will override what the current BB environment
 has set for the Big Brother Pager.
 
-=item * $bbmonitor->localhost
+=item * $bbmonitor->hostname
 
 This method will tell you what will be reported to the Big Brother server as 
 the originating host name. If you set this, it will report to big brother as
@@ -241,6 +249,7 @@ This method should be called last to send the message to the Big Brother server.
 
 =head1 AUTHOR
 
-Eirik Toft (grep_boy@yahoo.com)
+Eirik Toft (grep_boy@yahoo.com) with thanks to Kenneth T Dreyer who created 
+more platform independancy in the code.
 
 =cut

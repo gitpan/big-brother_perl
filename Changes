@@ -5,3 +5,5 @@ Revision history for Perl extension BBPerl.
 1.30 - Modified the sending routing to fork a new process rather than
        having the module to the work itself. This seemed to be needed
 			 for many of our Solaris bretheren.
+1.40 - Modification to use Sys::Hostname instead of shelling out and 
+       running hostname to get the local hosts name. That should make

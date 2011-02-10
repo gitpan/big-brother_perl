@@ -3,4 +3,6 @@ Makefile.PL
 MANIFEST
 README
 t/BBPerl.t
+t/hostname.t
+t/localhost.t
 lib/BBPerl.pm
