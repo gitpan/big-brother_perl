@@ -6,9 +6,9 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 require Exporter;
 
 @ISA = qw(Exporter);
-$VERSION = sprintf "%d.%03d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%03d", q$Revision: 1.55 $ =~ /: (\d+)\.(\d+)/;
 
-use Net::Domain qw(hostname hostfqdn);
+use Net::Domain;
 
 sub new {
 	my $class = shift;
@@ -207,11 +207,15 @@ BBPerl - Perl module for the ease of writing Perl based big brother monitors.
 use BBPerl;
 
 $bbmonitor = new BBPerl ('My_Monitor');
+
 $bbmonitor->debugLevel(1);
+
 $bbmonitor->testName('My_Monitor');
+
 $bbmonitor->status('red');
 
 $bbmonitor->addMsg('Something is very wrong');
+
 $bbmonitor->send;
 
 =head1 DESCRIPTION
