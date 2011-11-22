@@ -13,7 +13,7 @@ use warnings;
 use Test::More tests => 3;                      # last test to print
 
 use BBPerl;
-use Sys::Hostname;
+use Net::Domain qw(hostname);
 
 $ENV{BBHOME}="/tmp";
 $ENV{BBTMP}="/tmp";

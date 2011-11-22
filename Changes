@@ -7,3 +7,11 @@ Revision history for Perl extension BBPerl.
 			 for many of our Solaris bretheren.
 1.40 - Modification to use Sys::Hostname instead of shelling out and 
        running hostname to get the local hosts name. That should make
+1.50 - A new function has been added, useFQDN will instruct the 
+       monitor to report the Fully Qualified Domain Name.
+       AModification to only allow 75 msgs per report. This is a bug
+       fix to eliminate issue where test would abort with long cmd line.
+			 While big brother allows only 50, I still want to make sure that
+			 the DATA TRUNCATED would appear on the report page.
+			 Also, date is now computed using POSIX function strftime.
+			 Lastly, FQDNs are converted to use commas which the BB server likes.

@@ -6,9 +6,9 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 require Exporter;
 
 @ISA = qw(Exporter);
-$VERSION = sprintf "%d.%03d", q$Revision: 1.4 $ =~ /: (\d+)\.(\d+)/;
+$VERSION = sprintf "%d.%03d", q$Revision: 1.5 $ =~ /: (\d+)\.(\d+)/;
 
-use Sys::Hostname qw();
+use Net::Domain qw(hostname hostfqdn);
 
 sub new {
 	my $class = shift;
@@ -23,7 +23,9 @@ sub new {
 		_bbtmp => $ENV{BBTMP},
 		_bbcmd => $ENV{BB},
 		_bbdisp => $ENV{BBDISP},
-		_hostname => Sys::Hostname->hostname(),
+		_msgsnum=> 0,
+		_hostname => Net::Domain->hostname(),
+		_usefqdn=>0
 	};
 
 	if ($tname) {
@@ -35,6 +37,20 @@ sub new {
 	bless $self,$class;
 	return $self;
 }
+
+sub useFQDN {
+	my $self = shift;
+	if (@_) {
+		$self->{_usefqdn} = shift;
+		if ($self->{_usefqdn}) {
+			$self->{_hostname} = Net::Domain->hostfqdn();
+		} else {
+			$self->{_hostname} = Net::Domain->hostname();
+		}
+	}
+	return $self->{_usefqdn};
+}
+
 
 sub debugLevel {
 	my $self=shift;
@@ -68,9 +84,15 @@ sub status {
 
 sub addMsg {
 	my ($self,$msg) = @_;
-#	$self->{_bbmsgs} .= "<br />".$msg if defined($msg);
+	return $self->{_bbmsgs} if $self->{_msgsnum} >= 75;
 	$self->{_bbmsgs} .= "\n".$msg if defined($msg);
+	$self->{_msgsnum}++;
 	return $self->{_bbmsgs};
+}
+
+sub getMsgCount {
+	my $self = shift;
+	return $self->{_msgsnum};
 }
 
 sub bbdisp {
@@ -94,6 +116,7 @@ sub hostname {
 	my $self = shift;
 	if (@_) {
 		$self->{_hostname} = shift;
+		$self->{_usefqdn} = 0;
 	}
 	return $self->{_hostname};
 }
@@ -123,11 +146,26 @@ sub bbtmp {
 }
 
 
+
+
 sub send {
+	sub _date() {
+		use POSIX qw(strftime);
+		my @monstr = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+		my @daystr = qw(Sun Mon Tue Wed Thr Fri Sat);
+
+		my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+		my $year_long = 1900 + $year;
+		my $tz = strftime('%Z', localtime);
+
+		return sprintf '%3s %3s %2s %02s:%02s:%02s %3s %4s', $daystr[$wday], $monstr[$mon], $mday, $hour, $min, $sec, $tz, $year_long;
+	}
 	my $self = shift;
 	my $debug = $self->{_debug};
 	my $cmdline = $self->{_bbcmd}." ".$self->{_bbdisp};
-	my $statusline = "status ".$self->{_hostname}.".".$self->{_testName}." ".$self->{_status}." ".`date`;
+	my $localhostname = $self->{_hostname};
+	$localhostname =~ s/\./,/g;
+	my $statusline = "status ".$localhostname.".".$self->{_testName}." ".$self->{_status}." "._date();
 	chomp ($statusline);
 	if ($debug > 0) {
 		print "The following will be sent using command:\n";
@@ -139,6 +177,7 @@ sub send {
 	}
 	if ($debug < 2) {
 		my $bbmsgs=$self->{_bbmsgs};
+		$bbmsgs =~ s/"/\\"/g;
 # Like this would ever work.
 #		open (BBPIPE,"| ${cmdline} -") or die "Cannot open STDOUT to report\n";
 #		print BBPIPE "$statusline $bbmsgs";
@@ -209,7 +248,15 @@ status of the report. When no arguement is used, it returns the current status.
 =item * $bbmonitor->addMsg("I have something else to report")
 
 Adds more information to the report sent back to the Big Brother server. Each
-time this is called, the message is appended with an automatic line feed.
+time this is called, the message is appended with an automatic line feed. 
+Currently, this reporting tool only allows up to 75 lines to be reported. Most
+BB servers only allow 50 lines, then show a DATA TRUNCATED message.
+
+=item * $bbmonitor->getMsgCount()
+
+This will return the number of lines that are in the current message buffer.
+This can be useful to see if during a long report, you are coming close to the
+maximum number of lines that BB is allowed to accept. 
 
 =item * $bbmonitor->bbdisp
 
@@ -221,7 +268,17 @@ has set for the Big Brother Pager.
 
 This method will tell you what will be reported to the Big Brother server as 
 the originating host name. If you set this, it will report to big brother as
-if it were coming from a different host.
+if it were coming from the host name specified. If you set this value, it will
+set the useFQDN to 0.
+
+=item * $bbmonitor->useFQDN()
+
+This method will instruct the BB monitor to report the full FQDN of the host.
+If set to 1, the domain name of the host will be included in the report. If
+set to 0, only the hostname will be reported to the BB server. Setting this
+value will override the hostname set using the $bbmonitor->hostname function
+and set it either to the hostname or the hostfqdn. Checking this value will
+let you know if the monitor will report the FQDN.
 
 =item * $bbmonitor->bbhome
 

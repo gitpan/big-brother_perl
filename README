@@ -1,4 +1,4 @@
-BBPerl version 1.40
+BBPerl version 1.50
 ===================
 
 This module is designed to ease the use of sending custom reports
@@ -15,12 +15,16 @@ To install this module type the following:
 
 DEPENDENCIES
 
-None
+Net::Domain
 
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2011 by Eirik Toft
 
+A special thank you to Kenneth T Dreyer kdreyer@usgs.gov
+for some of the suggested modifications.
+
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.10.1 or,
 at your option, any later version of Perl 5 you may have available.
+

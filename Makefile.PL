@@ -8,5 +8,5 @@ WriteMakefile(
     PREREQ_PM         => {}, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/BBPerl.pm', # retrieve abstract from module
-       AUTHOR         => 'A. U. Thor <etoft@corp.inthosts.net>') : ()),
+       AUTHOR         => 'Eirik Toft <grep_boy@yahoo.com>') : ()),
 );
